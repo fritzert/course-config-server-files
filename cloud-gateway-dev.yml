@@ -16,10 +16,13 @@ spring:
     gateway:
       routes:
         - id: user-service
+          # lo que importa es el uri correcto
           uri: lb://user-service
           predicates:
             - Path=/api/user-service/**
           filters:
+            # indicando la cantidad de prefijos del recurso
+            # son 2 api/user-service 
             - StripPrefix=2
 
         - id: product-service
@@ -28,3 +31,40 @@ spring:
             - Path=/api/product-service/**
           filters:
             - StripPrefix=2
+            # - AddRequestHeader=token,mitocode
+            # - AddResponseHeader=CUSTOM_RESPONSE_HEADER,HEADER_Mitocode
+            - name: CircuitBreaker
+              args:
+                name: product-cb
+                fallbackUri: forward:/api/user-service/user/
+                statusCodes: 500, 400, 401, 403
+
+            # lo comentamos de momento para hacer las pruebas
+            #- MitocodeFilter=MitocodeKey, MitocodeValue
+
+            # - name: CustomFilter
+              # args:
+                # headerKey: MitocodeKey
+                # headerValue: MitocodeValue
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      mitocodeCircuitbreakerProduct:
+        slidingWindowSize: 20
+        failureRateThreshold: 75
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 10
+        slowCallDurationThreshold: 2s
+        slowCallRateThreshold: 10
+    instances:
+      product-cb:
+        base-config: mitocodeCircuitbreakerProduct
+  timelimiter:
+    configs:
+      mitocodeTimeLimiterProduct:
+        timeoutDuration: 1s
+    instances:
+      product-time:
+        base-config: mitocodeTimeLimiterProduct
+
