@@ -10,3 +10,47 @@ eureka:
     service-url:
       defaultZone: ${EUREKA.SERVER.HOSTNAME:http://localhost:8761/eureka}
     fetchRegistry: true
+
+
+resilience4j:
+  circuitBreaker:
+    configs:
+      # los metodos que tengan este id, tomaran esta configuracion
+      # aqui no se permite usar guiones, debe ser si o si camelCase
+      mitocodeCircuitbreakerProduct:
+        slidingWindowsSize: 20
+        failureRateThreshold: 75
+        waitDurationInOpenState: 30s 
+        # wait-duration-in-open-state esta forma es igual al anterior
+
+        permittedNumberOfCallsInHalfOpenState: 10 # que permita 10 peticiones en estado semiabierto
+        slowCallDurationThreshold: 2s # tiempo en demora para abrir circuito
+        slowCallRateThreshold: 10 # peticiones para abrir circuito
+      # mitocodeCircuitbreakerUser:
+      #   slidingWindowSize: 50
+      #   failureRateThreshold: 80
+      #   waitDurationInOpenState: 15s
+      #   permittedNumberOfCallsInHalfOpenState: 20
+      #   slowCallDurationThreshold: 2s
+      #   slowCallRateThreshold: 10
+    instances:
+      product-cb:
+        # que tome la configuracion base de 
+        base-config: mitocodeCircuitbreakerProduct
+      # userCB:
+      #   base-config: mitocodeCircuitbreakerUser
+  timelimiter:
+    configs:
+      mitocodeTimeLimiterProduct:
+        timeoutDuration: 1s
+    instances:
+      product-time:
+        base-config: mitocodeTimeLimiterProduct
+
+
+# feign:
+#   client:
+#     config:
+#       default:
+#         connectTimeout: 10000
+#         readTimeout: 20000
