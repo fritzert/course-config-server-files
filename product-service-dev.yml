@@ -1,8 +1,3 @@
-#mongodb:
-#  connection:
-#    url: http://localhost:9000/mongo
-#    username: mitocode
-#    password: '{cipher}90f03a620c255aa2d050cd357a88b991eaa18c64084d8a9dc203bac195b209c7'
 
 server:
   port: ${CUSTOM.SERVER.PORT:9002}
