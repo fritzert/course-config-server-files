@@ -16,6 +16,7 @@ spring:
     gateway:
       routes:
         - id: user-service
+          # lo que importa es el uri correcto
           uri: lb://user-service
           predicates:
             - Path=/api/user-service/**
